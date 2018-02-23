@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="/assets/css/print.css" />
+
+    <title>🖨 - [DEV] DemocrApp</title>
+
+  </head>
+  <body>
+    <div class="header-container">
+        <img class="header-logo" src="/assets/img/EUTCredonwhite.png" />
+    </div>
+    <h1>GM Vol 17</h1>
+    <h2>Meeting desc</h2>
+
+    <p>
+      You have now been registered. Your <strong>DemocrApp</strong>
+      authentication token is:
+    </p>
+
+    <div class="token-container">
+      <div id="qr-code" qr-data="https://democrapp.eutc.org.uk/#/auth?token=90123445" src=""></div>
+      <div class="text-token">
+        9012 3445
+      </div>
+    </div>
+
+    <div class="link-container">
+      <p>Please go to</p>
+      <p class="link">democrapp.eutc.org.uk</p>
+      <p class="right">and enter the above code</p>
+    </div>
+
+  </body>
+
+  <script src="/assets/vendor/qrcode.js"></script>
+  <script>
+    var qr = qrcode(4, 'L');
+    qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
+    qr.make();
+    document.getElementById('qr-code').innerHTML = qr.createImgTag();
+
+    window.print();
+    window.close();
+  </script>
+</html>

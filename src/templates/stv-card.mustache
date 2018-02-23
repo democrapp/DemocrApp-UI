@@ -1,0 +1,26 @@
+<form data-ballot="{{ballot_id}}" data-voter="{{voter_id}}" id="{{voter_id}}{{ballot_id}}">
+  <div class="card ballot">
+    <div class="card-header">
+      <h5 class="card-title">
+        {{title}} <span class="ballot-badges"><span class="badge badge-secondary">STV</span>{{#proxy}}<span class="badge badge-info">PROXY</span>{{/proxy}}</span>
+      </h5>
+    </div>
+    <div class="card-body">
+      <p class="card-text">
+        {{desc}}
+      </p>
+    </div>
+    <ul class="list-group list-group-flush">
+    {{#options}}
+      <li class="list-group-item">
+        {{name}}
+        <input name="{{id}}" class="ballot-preference-field" type="number" placeholder="0" />
+      </li>
+    {{/options}}
+    </ul>
+    <div class="card-footer">
+      <button type="button" onClick="submitSTVBallot('{{voter_id}}{{ballot_id}}')" class="btn btn-primary">Submit vote</button>
+      <button type="reset" class="btn btn-secondary">Reset</button>
+    </div>
+  </div>
+</form>
