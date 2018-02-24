@@ -84,7 +84,10 @@ function checkToken() {
         return;
       }
       alert("That voter token is invalid. Please try again.");
-    }
+    },
+    failure: function() {
+      alert("There was an issue communicating with the DemocrApp API. Please try again.");
+    } 
   })
 }
 
