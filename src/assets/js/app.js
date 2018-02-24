@@ -162,23 +162,23 @@ function ballotRecieved(msg) {
 
 function submitSTVBallot(cardId) {
   var form = $('#' + cardId);
+  var options = form.serializeArray();
+  options.sort((a, b) => { return a.value > b.value; });
+  var currentpref = 1;
+  var out = {}
+  options.forEach(option => {
+    if (option.value == "") { /* ignore */ }
+    else if (option.value % 1 != 0) { currentpref = -1; return;}
+    else if (option.value == currentpref) { currentpref++; out[option.name] = option.value; }
+    else { currentpref = -1; return; }
+  })
+  if (currentpref == -1) {
+    alert("Please double check your preference entries, use consecutive whole numbers");
+    return;
+  }
   $('#' + cardId + ' .card-footer button').fadeOut();
   $('#' + cardId + ' .list-group').fadeOut(() => {
     $('#' + cardId + " .loader").fadeIn(() => {
-      var options = form.serializeArray();
-      options.sort((a, b) => { return a.value > b.value; });
-      var currentpref = 1;
-      var out = {}
-      options.forEach(option => {
-        if (option.value == "") { /* ignore */ }
-        else if (option.value % 1 != 0) { currentpref = -1; return;}
-        else if (option.value == currentpref) { currentpref++; out[option.name] = option.value; }
-        else { currentpref = -1; return; }
-      })
-      if (currentpref == -1) {
-        alert("Please double check your preference entries, use consecutive whole numbers");
-        return;
-      }
       var message = {
         type: "ballot_form",
         ballot_id: form.attr('data-ballot'),
