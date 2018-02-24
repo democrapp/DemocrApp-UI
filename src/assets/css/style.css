@@ -16,7 +16,7 @@ body {
   border-width: 10px;
   background-color: #ffff;
   min-height: 40vh;
-  padding: 5vh 7vw 5vh 7vw; }
+  padding: 5vh 30px 5vh 30px; }
 
 #footer {
   text-align: center;
@@ -35,6 +35,12 @@ body {
 
 .ballot {
   margin-bottom: 20px; }
+  .ballot .loader, .ballot .success {
+    display: none;
+    margin: 20px;
+    text-align: center; }
+    .ballot .loader p, .ballot .loader h6, .ballot .success p, .ballot .success h6 {
+      margin-top: 15px; }
 
 .ballot-badges {
   float: right; }
@@ -59,7 +65,10 @@ body {
   animation-iteration-count: infinite; }
 
 .message {
-  margin: 5vw;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 15px;
+  margin-right: 15px;
   padding: 15px;
   border-width: 1px;
   border-radius: 5px;
