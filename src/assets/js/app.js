@@ -4,7 +4,7 @@ var sessionState = "new";
 var sessionToken;
 var meetingName;
 var voters;
-var API_HOST = "192.168.0.38:8000";
+var API_HOST = "democrapp.bedlamtheatre.co.uk";
 var annId = 0;
 var visibleCards = 0;
 
@@ -72,7 +72,7 @@ function dismissElement(id) {
 // auth page scripts
 function checkToken() {
   $.ajax({
-    url: "http://" + API_HOST + '/1/checktoken',
+    url: "https://" + API_HOST + '/api/1/checktoken',
     method: 'POST',
     data: {
       "token": $('#authToken').val()
@@ -307,7 +307,7 @@ function castRecieved(msg) {
 }
 
 function openSocket() {
-  cast = new WebSocket("ws://" + API_HOST);
+  cast = new WebSocket("wss://" + API_HOST + "/cast");
   castState = "connecting";
   replacePage('loading');
   var hs = {
