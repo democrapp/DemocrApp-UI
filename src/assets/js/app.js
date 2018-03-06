@@ -378,7 +378,7 @@ function userEndSession() {
 }
 
 // Page initialisation
-function pageLoad() {
+function init() {
   if (Cookies.get("session_token") != undefined) {
     console.log("[INIT] Found existing session token.");
     sessionToken = Cookies.get("session_token");
@@ -389,6 +389,14 @@ function pageLoad() {
 }
 
 $(document).ready(function() { 
-  pageLoad();
+  console.log("[INIT] Checking for WebSocket support");
+  if (window.WebSocket){
+    console.log("[INIT] WebSocket support found");
+    init();
+  }
+  else {
+    console.error("[INIT] WebSocket support not found. Unable to launch app.");
+    replacePage('notsupported');
+  }
   //replacePage(translateHash(window.location.hash));
 });
