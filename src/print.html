@@ -21,10 +21,14 @@
     </p>
 
     <div class="token-container">
-      <div id="qr-code" qr-data="https://democrapp.eutc.org.uk/#/auth?token=90123445" src=""></div>
-      <div class="text-token">
-        9012 3445
+      <div id="qr-code" qr-data="https://democrapp.eutc.org.uk/" src=""></div>
+      <div id="tokenfield" class="text-token">
+        XXXX XXXX
       </div>
+    </div>
+
+    <div id="tokenwarning" style="display: none;">
+      <h2>NOTE: This token has a proxy attached</h2>
     </div>
 
     <div class="link-container">
@@ -35,14 +39,31 @@
 
   </body>
 
+  <script src="/assets/vendor/jquery.min.js"></script>
   <script src="/assets/vendor/qrcode.js"></script>
   <script>
+    $.urlParam = function(name){
+      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+      if (results==null){
+        return null;
+      }
+      else{
+        return decodeURI(results[1]) || 0;
+      }
+    }
+
+    var t = $.urlParam('t');
+    $('#tokenfield').html(t);
+    if ($.urlParam('p')) {
+      $('#tokenwarning').show();
+    };
+
     var qr = qrcode(4, 'L');
     qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
     qr.make();
     document.getElementById('qr-code').innerHTML = qr.createImgTag();
 
-    window.print();
-    window.close();
+    //window.print();
+    //window.close();
   </script>
 </html>
