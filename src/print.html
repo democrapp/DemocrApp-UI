@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="stylesheet" href="/assets/css/print.css" />
 
-    <title>🖨 - [DEV] DemocrApp</title>
+    <title>🖨 - DemocrApp</title>
 
   </head>
   <body>
     <div class="header-container">
         <img class="header-logo" src="/assets/img/EUTCredonwhite.png" />
     </div>
-    <h1>GM Vol 17</h1>
-    <h2>Meeting desc</h2>
+    <h1 id="heading">{meeting name}</h1>
+    <h2 id="desc">...</h2>
 
     <p>
       You have now been registered. Your <strong>DemocrApp</strong>
@@ -21,7 +21,7 @@
     </p>
 
     <div class="token-container">
-      <div id="qr-code" qr-data="https://democrapp.eutc.org.uk/" src=""></div>
+      <div id="qr-code" qr-data="https://democrapp.bedlamtheatre.co.uk/" src=""></div>
       <div id="tokenfield" class="text-token">
         XXXX XXXX
       </div>
@@ -33,8 +33,8 @@
 
     <div class="link-container">
       <p>Please go to</p>
-      <p class="link">democrapp.eutc.org.uk</p>
-      <p class="right">and enter the above code</p>
+      <p class="link">democrapp.bedlamtheatre.co.uk</p>
+      <p class="">and enter the above code or scan the QR code to be logged in automatically</p>
     </div>
 
   </body>
@@ -51,19 +51,23 @@
         return decodeURI(results[1]) || 0;
       }
     }
+    
+    $(document).ready(() => {
+      var t = $.urlParam('t');
+      $('#tokenfield').html(t);
+      $('#qr-code').attr("qr-data", "https://democrapp.bedlamtheatre.co.uk/?t=" + t);
+      $('#heading').html($.urlParam('h'));
+      $('#desc').html($.urlParam('d'));
+      if ($.urlParam('p')) {
+        $('#tokenwarning').show();
+      };
+      var qr = qrcode(4, 'L');
+      qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
+      qr.make();
+      document.getElementById('qr-code').innerHTML = qr.createImgTag(3);
 
-    var t = $.urlParam('t');
-    $('#tokenfield').html(t);
-    if ($.urlParam('p')) {
-      $('#tokenwarning').show();
-    };
-
-    var qr = qrcode(4, 'L');
-    qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
-    qr.make();
-    document.getElementById('qr-code').innerHTML = qr.createImgTag();
-
-    //window.print();
-    //window.close();
+      window.print();
+      setTimeout(function () { window.close(); }, 100);
+    });
   </script>
 </html>

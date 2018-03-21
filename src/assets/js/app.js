@@ -5,6 +5,7 @@ var sessionToken;
 var meetingName;
 var voters;
 var API_HOST = "democrapp.bedlamtheatre.co.uk";
+var API_WS_PROTOCOL = "wss://";
 var annId = 0;
 var visibleCards = 0;
 
@@ -70,12 +71,16 @@ function dismissElement(id) {
 }
 
 // auth page scripts
-function checkToken() {
+function checkTokenClick() {
+  checkToken($('#authToken').val());
+}
+
+function checkToken(authToken) {
   $.ajax({
-    url: "https://" + API_HOST + '/api/1/checktoken',
+    url: location.protocol + '//' + API_HOST + '/api/1/checktoken',
     method: 'POST',
     data: {
-      "token": $('#authToken').val()
+      "token": authToken
     },
     success: function(data) {
       console.log(data);
@@ -98,6 +103,11 @@ function tokenValid(data) {
 }
 
 function ballotRecieved(msg) {
+  if (msg.existing_ballots) {
+    $.get("/templates/revote-alert.mustache", function(template) {
+      $(Mustache.render(template, {ballot_name: msg.title})).appendTo('#alerts');
+    });
+  }
   switch (msg.method){
     case "STV":
       console.log("[BALLOT] New using STV");
@@ -211,7 +221,7 @@ function ynaButtonClick(id) {
 function ynaSubmit(ballot_id, voter_id, opt_id) {
   console.log('ynaSubmit Fired');
   $('#b-' + voter_id + ballot_id + ' .card-footer').children().fadeOut();
-  $('#b-' + voter_id + ballot_id + ' .btn-group').fadeOut(() => {
+  $('#b-' + voter_id + ballot_id + ' .active-body').fadeOut(() => {
     $('#b-' + voter_id + ballot_id + " .loader").fadeIn(() => {
       var message = {
         type: "ballot_form",
@@ -307,7 +317,7 @@ function castRecieved(msg) {
 }
 
 function openSocket() {
-  cast = new WebSocket("wss://" + API_HOST + "/cast");
+  cast = new WebSocket(API_WS_PROTOCOL + API_HOST + "/cast");
   castState = "connecting";
   replacePage('loading');
   var hs = {
@@ -377,12 +387,24 @@ function userEndSession() {
   location.reload();
 }
 
+$.urlParam = function(name){
+  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+  if (results==null){
+    return null;
+  }
+  else{
+    return decodeURI(results[1]) || 0;
+  }
+}
+
 // Page initialisation
 function init() {
   if (Cookies.get("session_token") != undefined) {
     console.log("[INIT] Found existing session token.");
     sessionToken = Cookies.get("session_token");
     openSocket();
+  } else if ($.urlParam('t')) {
+    checkToken($.urlParam('t'));
   } else {
     replacePage('landing');
   }

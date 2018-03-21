@@ -8,10 +8,12 @@
       <p class="card-text">
         {{desc}}
       </p>
-      <div class="btn-group" role="group" data-ballotid="{{ballot_id}}" data-voterid="{{voter_id}}">
-        <button id="b-{{voter_id}}{{ballot_id}}-y" type="button" class="btn btn-lg btn-success" data-optid="{{yes_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-y')">Yes</button>
-        <button id="b-{{voter_id}}{{ballot_id}}-n" type="button" class="btn btn-lg btn-danger" data-optid="{{no_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-n')">No</button>
-        <button id="b-{{voter_id}}{{ballot_id}}-a" type="button" class="btn btn-lg btn-secondary" data-optid="{{abs_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-a')">Abstain</button>
+      <div class="active-body">
+        <div class="btn-group" role="group" data-ballotid="{{ballot_id}}" data-voterid="{{voter_id}}">
+          <button id="b-{{voter_id}}{{ballot_id}}-y" type="button" class="btn btn-lg btn-success" data-optid="{{yes_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-y')">Yes</button>
+          <button id="b-{{voter_id}}{{ballot_id}}-n" type="button" class="btn btn-lg btn-danger" data-optid="{{no_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-n')">No</button>
+          <button id="b-{{voter_id}}{{ballot_id}}-a" type="button" class="btn btn-lg btn-secondary" data-optid="{{abs_id}}" onClick="ynaButtonClick('b-{{voter_id}}{{ballot_id}}-a')">Abstain</button>
+        </div>
       </div>
       <div class="loader" style="">
         <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
