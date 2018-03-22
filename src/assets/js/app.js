@@ -249,19 +249,21 @@ function ballotReceipt(msg) {
 }
 
 function ballotClosed(msg) {
-  var v = {
-    ballot_name: $('#stream [data-ballot=' + msg.ballot_id +'] .card-title').first().html(),
-    reason: msg.reason,
-    id: "a-" + (annId++)
+  var ballotcards = $('#stream [data-ballot=' + msg.ballot_id +'] .card-title')
+  if (ballotcards.length) {
+    var v = {
+      ballot_name: $('#stream [data-ballot=' + msg.ballot_id +'] .card-title').first().html(),
+      reason: msg.reason,
+      id: "a-" + (annId++)
+    }
+    $.get("/templates/ballot-closed-card.mustache", function(template) {
+      addBallotCard(Mustache.render(template, v));
+    });
+    $('#stream [data-ballot=\'' + msg.ballot_id + '\']').fadeOut(() => {
+      $(this).remove();
+      visibleCards--;
+    });
   }
-  $.get("/templates/ballot-closed-card.mustache", function(template) {
-    addBallotCard(Mustache.render(template, v));
-  });
-  $('#stream [data-ballot=\'' + msg.ballot_id + '\']').fadeOut(() => {
-    $(this).remove();
-    visibleCards--;
-  });
-
 }
 
 // Websocket things
