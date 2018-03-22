@@ -79,13 +79,14 @@ function loadAuth() {
       success: function(data) {
         if (data.meetings.length == 0) {
           replacePage('nomeetings');
+          return;
         }
         $.get("/templates/auth.mustache", function(template) {
           $('#page').html(Mustache.render(template, data));
           $('#loader').fadeOut(() => $('#page').fadeIn());
         });
       },
-      failure: function(textStatus) {
+      error: function(textStatus) {
         alert('There has been an error communicating with the DemocrApp server. Error: ' + textStatus);
       }
     })
