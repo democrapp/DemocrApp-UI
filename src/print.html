@@ -54,8 +54,9 @@
     
     $(document).ready(() => {
       var t = $.urlParam('t');
+      var m = $.urlParam('m');
       $('#tokenfield').html(t);
-      $('#qr-code').attr("qr-data", "https://democrapp.bedlamtheatre.co.uk/?t=" + t);
+      $('#qr-code').attr("qr-data", "https://democrapp.bedlamtheatre.co.uk/?t=" + t + "&m=" + m);
       $('#heading').html($.urlParam('h'));
       $('#desc').html($.urlParam('d'));
       if ($.urlParam('p') == "True") {
@@ -65,9 +66,10 @@
       qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
       qr.make();
       document.getElementById('qr-code').innerHTML = qr.createImgTag(3);
-
-      window.print();
-      setTimeout(function () { window.close(); }, 100);
+      $(document).ready(() => {
+        window.print();
+        setTimeout(function () { window.close(); }, 100);
+      });
     });
   </script>
 </html>
