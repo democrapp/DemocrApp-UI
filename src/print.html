@@ -58,7 +58,7 @@
       $('#qr-code').attr("qr-data", "https://democrapp.bedlamtheatre.co.uk/?t=" + t);
       $('#heading').html($.urlParam('h'));
       $('#desc').html($.urlParam('d'));
-      if ($.urlParam('p')) {
+      if ($.urlParam('p') == "True") {
         $('#tokenwarning').show();
       };
       var qr = qrcode(4, 'L');
