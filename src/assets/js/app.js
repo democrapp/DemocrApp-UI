@@ -71,13 +71,35 @@ function dismissElement(id) {
 }
 
 // auth page scripts
-function checkTokenClick() {
-  checkToken($('#authToken').val());
+
+function loadAuth() {
+  $('#page').fadeOut(() => $('#loader').fadeOut(() => {
+    $.ajax({
+      url: location.protocol + '//' + API_HOST + '/api/list',
+      success: function(data) {
+        if (data.meetings.length == 0) {
+          replacePage('nomeetings');
+          return;
+        }
+        $.get("/templates/auth.mustache", function(template) {
+          $('#page').html(Mustache.render(template, data));
+          $('#loader').fadeOut(() => $('#page').fadeIn());
+        });
+      },
+      error: function(textStatus) {
+        alert('There has been an error communicating with the DemocrApp server. Error: ' + textStatus);
+      }
+    })
+  }))
 }
 
-function checkToken(authToken) {
+function checkTokenClick() {
+  checkToken($('#authToken').val(), $('#authMeetings').val());
+}
+
+function checkToken(authToken, meetingId) {
   $.ajax({
-    url: location.protocol + '//' + API_HOST + '/api/1/checktoken',
+    url: location.protocol + '//' + API_HOST + '/api/' + meetingId + '/checktoken',
     method: 'POST',
     data: {
       "token": authToken
@@ -86,9 +108,9 @@ function checkToken(authToken) {
       console.log(data);
       if (data.success == true) {
         tokenValid(data);
-        return;
-      }
-      alert("That voter token is invalid. Please try again.");
+      } else {
+        alert("That voter token is invalid. Please try again.");
+      } 
     },
     error: function() {
       alert("There was an issue communicating with the DemocrApp API. Please try again.");
@@ -405,10 +427,11 @@ function init() {
     console.log("[INIT] Found existing session token.");
     sessionToken = Cookies.get("session_token");
     openSocket();
-  } else if ($.urlParam('t')) {
-    checkToken($.urlParam('t'));
   } else {
     replacePage('landing');
+    if ($.urlParam('t')) {
+      checkToken($.urlParam('t'), $.urlParam('m'));
+    } 
   }
 }
 
