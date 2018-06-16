@@ -4,10 +4,12 @@ var sessionState = "new";
 var sessionToken;
 var meetingName;
 var voters;
-var API_HOST = "democrapp.bedlamtheatre.co.uk";
-var API_WS_PROTOCOL = "wss://";
+var API_HOST = location.host;
+var API_WS_PROTOCOL = location.protocol == "https:" ? "wss://" : "ws://";
 var annId = 0;
 var visibleCards = 0;
+var unfilledBallots = 0;
+var KIOSK_MODE;
 
 // Routing
 var routes = {
@@ -32,12 +34,12 @@ function replacePage(id) {
   $.ajax({
     method: 'GET',
     url: '/pages/' + id + '.html',
-    success: function(data) { 
+    success: function(data) {
       $('#page').html(data);
       currentPage = id;
       $('#loader').fadeOut(() => {$('#page').fadeIn()});
     },
-    error: function(textStatus) { 
+    error: function(textStatus) {
       alert("AJAX failure: " + textStatus + ". Please try again.");
       $('#page').html(data);
     },
@@ -51,6 +53,7 @@ function addBallotCard(html) {
   }
   $(html).hide().appendTo("#stream").fadeIn();
   visibleCards++;
+  unfilledBallots++;
 }
 
 function replaceStream(html) {
@@ -110,11 +113,11 @@ function checkToken(authToken, meetingId) {
         tokenValid(data);
       } else {
         alert("That voter token is invalid. Please try again.");
-      } 
+      }
     },
     error: function() {
       alert("There was an issue communicating with the DemocrApp API. Please try again.");
-    } 
+    }
   })
 }
 
@@ -267,6 +270,10 @@ function ballotReceipt(msg) {
     $('#' + card_id + ' .loader').fadeOut(() => {
       $('#' + card_id + ' .success').fadeIn();
     })
+    unfilledBallots--;
+    if ( unfilledBallots == 0 && KIOSK_MODE){
+      userEndSession();
+    }
   })
 }
 
@@ -284,6 +291,7 @@ function ballotClosed(msg) {
     $('#stream [data-ballot=\'' + msg.ballot_id + '\']').fadeOut(() => {
       $(this).remove();
       visibleCards--;
+      unfilledBallots--;
     });
   }
 }
@@ -408,7 +416,11 @@ function userEndSession() {
   console.log("[SESSION] User terminated session.");
   cast.close();
   Cookies.remove("session_token");
-  location.reload();
+  if (KIOSK_MODE){
+    location.replace(location.protocol + "//" + location.host + "/?k=True")
+  } else {
+    location.reload();
+  }
 }
 
 $.urlParam = function(name){
@@ -423,6 +435,7 @@ $.urlParam = function(name){
 
 // Page initialisation
 function init() {
+   KIOSK_MODE = ($.urlParam('k') == "true");
   if (Cookies.get("session_token") != undefined) {
     console.log("[INIT] Found existing session token.");
     sessionToken = Cookies.get("session_token");
@@ -431,11 +444,11 @@ function init() {
     replacePage('landing');
     if ($.urlParam('t')) {
       checkToken($.urlParam('t'), $.urlParam('m'));
-    } 
+    }
   }
 }
 
-$(document).ready(function() { 
+$(document).ready(function() {
   console.log("[INIT] Checking for WebSocket support");
   if (window.WebSocket){
     console.log("[INIT] WebSocket support found");
