@@ -88,6 +88,7 @@ function loadAuth() {
         $.get("/templates/auth.mustache", function(template) {
           $('#page').html(Mustache.render(template, data));
           $('#loader').fadeOut(() => $('#page').fadeIn());
+          $('#authForm').submit(submitTokenForm);
         });
       },
       error: function(textStatus) {
@@ -106,11 +107,13 @@ function loadKioskLanding() {
           replacePage('nomeetings');
           return;
         }
-        if (data.meetings[_meetingId]){
+        var meeting = data.meetings.find(m => m.id == _meetingId)
+        if (meeting){
           $.get("/templates/kiosk-landing.mustache", function(template) {
-            $('#page').html(Mustache.render(template, {'meeting_name': data.meetings[_meetingId]}));
+            $('#page').html(Mustache.render(template, {'meeting_name': meeting.name, 'meeting_id': _meetingId}));
             $('#loader').fadeOut(() => $('#page').fadeIn());
             $('#authToken').focus();
+            $('#authForm').submit(submitTokenForm);
           });
         } else {
           replacePage('400');
@@ -124,17 +127,13 @@ function loadKioskLanding() {
   }))
 }
 
-function checkTokenClick() {
+function submitTokenForm(event) {
+  event.preventDefault();
   checkToken($('#authToken').val(), $('#authMeetings').val());
 }
 
-function checkTokenClick_kiosk() {
-  if (!KIOSK_MODE) { location.reload() };
-  checkToken($('#authToken').val(), _meetingId);
-}
-
 function checkToken(authToken, meetingId) {
-  var urlmatch = authToken.match(/.+\?t=(\d{8}).+/gm);
+  var urlmatch = authToken.match(/.+\?t=(\d{8}).+/);
   if (urlmatch) { authToken = urlmatch[1]; }
   $.ajax({
     url: location.protocol + '//' + API_HOST + '/api/' + meetingId + '/checktoken',
@@ -157,6 +156,7 @@ function checkToken(authToken, meetingId) {
 }
 
 function tokenValid(data) {
+  $('#logoutButton').show();
   Cookies.set("session_token", data.session_token, { expires: 1 });
   sessionToken = data.session_token;
   openSocket();
@@ -307,7 +307,7 @@ function ballotReceipt(msg) {
     })
     unfilledBallots--;
     if ( unfilledBallots == 0 && KIOSK_MODE){
-      userEndSession();
+      setTimeout(userEndSession, 1000);
     }
   })
 }
@@ -345,7 +345,6 @@ function castRecieved(msg) {
         $.get("/templates/stream.mustache", function(template) {
           $('#page').html(Mustache.render(template, { meeting_name: meetingName }));
         });
-        $('logoutButton').show();
       } else {
         console.log("[CAST] Authentication failed.");
         sessionState = "terminated";
@@ -455,7 +454,7 @@ function userEndSession() {
   cast.close();
   Cookies.remove("session_token");
   if (KIOSK_MODE){
-    location.replace(location.protocol + "//" + location.host + "/?k=True")
+    location.replace(location.protocol + "//" + location.host + "/?k=true&m=" + _meetingId);
   } else {
     location.reload();
   }
