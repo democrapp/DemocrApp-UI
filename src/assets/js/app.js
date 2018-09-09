@@ -107,7 +107,7 @@ function loadKioskLanding() {
           return;
         }
         if (data.meetings[_meetingId]){
-          $.get("/templates/kiosklanding.mustache", function(template) {
+          $.get("/templates/kiosk-landing.mustache", function(template) {
             $('#page').html(Mustache.render(template, {'meeting_name': data.meetings[_meetingId]}));
             $('#loader').fadeOut(() => $('#page').fadeIn());
             $('#authToken').focus();
