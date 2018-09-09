@@ -10,6 +10,7 @@ var annId = 0;
 var visibleCards = 0;
 var unfilledBallots = 0;
 var KIOSK_MODE;
+var _meetingId;
 
 // Routing
 var routes = {
@@ -96,11 +97,45 @@ function loadAuth() {
   }))
 }
 
+function loadKioskLanding() {
+  $('#page').fadeOut(() => $('#loader').fadeOut(() => {
+    $.ajax({
+      url: location.protocol + '//' + API_HOST + '/api/list',
+      success: function(data) {
+        if (data.meetings.length == 0) {
+          replacePage('nomeetings');
+          return;
+        }
+        if (data.meetings[_meetingId]){
+          $.get("/templates/kiosklanding.mustache", function(template) {
+            $('#page').html(Mustache.render(template, {'meeting_name': data.meetings[_meetingId]}));
+            $('#loader').fadeOut(() => $('#page').fadeIn());
+            $('#authToken').focus();
+          });
+        } else {
+          replacePage('400');
+          alert('Invalid meeting ID. Contact event organiser.');
+        }
+      },
+      error: function(textStatus) {
+        alert('There has been an error communicating with the DemocrApp server. Error: ' + textStatus);
+      }
+    })
+  }))
+}
+
 function checkTokenClick() {
   checkToken($('#authToken').val(), $('#authMeetings').val());
 }
 
+function checkTokenClick_kiosk() {
+  if (!KIOSK_MODE) { location.reload() };
+  checkToken($('#authToken').val(), _meetingId);
+}
+
 function checkToken(authToken, meetingId) {
+  var urlmatch = authToken.match(/.+\?t=(\d{8}).+/gm);
+  if (urlmatch) { authToken = urlmatch[1]; }
   $.ajax({
     url: location.protocol + '//' + API_HOST + '/api/' + meetingId + '/checktoken',
     method: 'POST',
@@ -310,6 +345,7 @@ function castRecieved(msg) {
         $.get("/templates/stream.mustache", function(template) {
           $('#page').html(Mustache.render(template, { meeting_name: meetingName }));
         });
+        $('logoutButton').show();
       } else {
         console.log("[CAST] Authentication failed.");
         sessionState = "terminated";
@@ -403,6 +439,7 @@ function closeSocket() {
 window.onbeforeunload = closeSocket;
 
 function terminateSession(msg) {
+  $('logoutButton').hide();
   sessionState = "terminated";
   console.log("[CAST] Session terminated by server.");
   $.get("/templates/terminated-card.mustache", function(template) {
@@ -413,6 +450,7 @@ function terminateSession(msg) {
 }
 
 function userEndSession() {
+  $('logoutButton').hide();
   console.log("[SESSION] User terminated session.");
   cast.close();
   Cookies.remove("session_token");
@@ -435,7 +473,14 @@ $.urlParam = function(name){
 
 // Page initialisation
 function init() {
-   KIOSK_MODE = ($.urlParam('k') == "true");
+  KIOSK_MODE = ($.urlParam('k') == "true");
+  if (KIOSK_MODE) {
+    Cookies.remove("session_token");
+    if (!$.urlParam('m')) { replacePage('400'); }
+    _meetingId = $.urlParam('m');
+    loadKioskLanding();
+    return;
+  }
   if (Cookies.get("session_token") != undefined) {
     console.log("[INIT] Found existing session token.");
     sessionToken = Cookies.get("session_token");
