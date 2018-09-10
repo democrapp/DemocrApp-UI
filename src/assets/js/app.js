@@ -156,7 +156,6 @@ function checkToken(authToken, meetingId) {
 }
 
 function tokenValid(data) {
-  $('#logoutButton').show();
   Cookies.set("session_token", data.session_token, { expires: 1 });
   sessionToken = data.session_token;
   openSocket();
@@ -339,6 +338,7 @@ function castRecieved(msg) {
     case "auth_response":
       if (msg.result == "success"){
         console.log("[CAST] Authentication success.");
+        $('#logoutButton').show();
         meetingName = msg.meeting_name;
         voters = msg.voters;
         sessionState = "connected";
