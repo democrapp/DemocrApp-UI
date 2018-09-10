@@ -298,6 +298,13 @@ function ynaSubmit(ballot_id, voter_id, opt_id) {
 }
 
 function ballotReceipt(msg) {
+  if (msg.result == "failure") {
+    $('#stream [data-ballot=' + msg.ballot_id +']').fadeOut();
+    $.get("/templates/ballot-failed.mustache", function(template) {
+      $('#stream').hide().prepend(Mustache.render(template, { id: id, reason: msg.reason })).fadeIn();
+      visibleCards++;
+    });
+  }
   msg.voter_token.forEach(voter => {
     var card_id = 'b-' + voter + msg.ballot_id;
     console.log("[BALLOT] API acknowledged receipt of vote from card id " + card_id + ".");
