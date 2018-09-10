@@ -2,14 +2,18 @@
 
 <p>Please select your meeting and enter your unique voter token in the box below.</p>
 
-<select id="authMeetings" class="form-control">
-  {{#meetings}}
-  <option value="{{id}}">{{name}}</option>
-  {{/meetings}}
-</select>
 
-<input class="form-control" type="number" placeholder="token" id="authToken" />
 
-<button class="btn btn-primary mx-auto btn-block" onclick="checkTokenClick()">Submit</button>
+<form id="authForm">
+  <select id="authMeetings" class="form-control">
+    {{#meetings}}
+    <option value="{{id}}">{{name}}</option>
+    {{/meetings}}
+  </select>
+
+  <input class="form-control" type="number" placeholder="token" id="authToken" />
+
+  <button type="submit" class="btn btn-primary mx-auto btn-block">Submit</button>
+</form>
 
 <p class="small">If you have your paper token, you can just scan the QR code to be logged in automatically!</p>
