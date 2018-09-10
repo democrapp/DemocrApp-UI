@@ -299,11 +299,13 @@ function ynaSubmit(ballot_id, voter_id, opt_id) {
 
 function ballotReceipt(msg) {
   if (msg.result == "failure") {
+    visibleCards -= $('#stream [data-ballot=' + msg.ballot_id +']').length;
     $('#stream [data-ballot=' + msg.ballot_id +']').fadeOut();
     $.get("/templates/ballot-failed.mustache", function(template) {
-      $('#stream').hide().prepend(Mustache.render(template, { id: id, reason: msg.reason })).fadeIn();
+      $('#stream').prepend(Mustache.render(template, { id: msg.ballot_id+'_err', reason: msg.reason })).fadeIn();
       visibleCards++;
     });
+    return;
   }
   msg.voter_token.forEach(voter => {
     var card_id = 'b-' + voter + msg.ballot_id;
