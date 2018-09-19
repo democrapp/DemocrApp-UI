@@ -54,7 +54,6 @@ function addBallotCard(html) {
   }
   $(html).hide().appendTo("#stream").fadeIn();
   visibleCards++;
-  unfilledBallots++;
 }
 
 function replaceStream(html) {
@@ -70,6 +69,9 @@ function dismissElement(id) {
   console.log("[STREAM] Dismissed element " + id);
   visibleCards--;
   if (visibleCards == 0) {
+    if (KIOSK_MODE) {
+      userEndSession();
+    }
     $('#message-connected').fadeIn();
   }
 }
@@ -334,7 +336,6 @@ function ballotClosed(msg) {
     $('#stream [data-ballot=\'' + msg.ballot_id + '\']').fadeOut(() => {
       $(this).remove();
       visibleCards--;
-      unfilledBallots--;
     });
   }
 }
