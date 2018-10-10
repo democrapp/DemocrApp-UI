@@ -53,7 +53,7 @@ function addBallotCard(html) {
   if (visibleCards == 0) {
     $('#message-connected').fadeOut();
   }
-  $(html).hide().prepend("#stream").fadeIn();
+  $(html).hide().appendTo("#stream").fadeIn();
   visibleCards++;
 }
 
