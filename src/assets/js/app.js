@@ -242,7 +242,7 @@ function submitSTVBallot(cardId) {
   var currentpref = 1;
   var out = {}
   options.forEach(option => {
-    if (option.value == "") { /* ignore */ }
+    if (!option.value) { /* ignore */ }
     else if (option.value % 1 != 0) { currentpref = -1; return;}
     else if (option.value == currentpref) { currentpref++; out[option.name] = option.value; }
     else { currentpref = -1; return; }
