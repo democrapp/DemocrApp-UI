@@ -238,7 +238,7 @@ function ballotRecieved(msg) {
 function submitSTVBallot(cardId) {
   var form = $('#' + cardId);
   var options = form.serializeArray();
-  options.sort((a, b) => { return a.value > b.value; });
+  options.sort((a, b) => { return a.value - b.value; });
   var currentpref = 1;
   var out = {}
   options.forEach(option => {
