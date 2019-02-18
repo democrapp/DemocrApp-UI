@@ -8,6 +8,7 @@ var MASTER_HOST = location.host.split('.').slice(1).join('.') // drop first subd
 var SLUG = location.host.split('.')[0]
 var API_HOST = location.host;
 var API_WS_PROTOCOL = location.protocol == "https:" ? "wss://" : "ws://";
+var GRC_SITEKEY = '6Ld3UpIUAAAAAIPlyQ-YheY_F6fagBO2aY4se9O-'
 var annId = 0;
 var visibleCards = 0;
 var unfilledBallots = 0;
@@ -72,10 +73,15 @@ function loadAuth() {
           replacePage('nomeetings');
           return;
         }
+        params = {
+          'meetings': data.meetings,
+          'grc_sitekey': GRC_SITEKEY
+        }
         $.get("/templates/auth.mustache", function(template) {
-          $('#page').html(Mustache.render(template, data));
+          $('#page').html(Mustache.render(template, params));
           $('#loader').fadeOut(() => $('#page').fadeIn());
           $('#authForm').submit(submitTokenForm);
+          grecaptcha.render();
         });
       },
       error: function(textStatus) {
@@ -117,14 +123,16 @@ function submitTokenForm(event) {
   checkToken($('#authToken').val(), $('#authMeetings').val());
 }
 
-function checkToken(authToken, meetingId) {
+async function checkToken(authToken, meetingId) {
   var urlmatch = authToken.match(/.+\?t=(\d{8}).+/);
   if (urlmatch) { authToken = urlmatch[1]; }
+  g = await grecaptcha.getResponse();
   $.ajax({
     url: location.protocol + '//' + API_HOST + '/api/' + meetingId + '/checktoken',
     method: 'POST',
     data: {
-      "token": authToken
+      "token": authToken,
+      "recaptcha": g
     },
     success: function(data) {
       console.log(data);
@@ -136,6 +144,7 @@ function checkToken(authToken, meetingId) {
     },
     error: function() {
       alert("There was an issue communicating with the DemocrApp API. Please try again.");
+      grecaptcha.reset()
     }
   })
 }
