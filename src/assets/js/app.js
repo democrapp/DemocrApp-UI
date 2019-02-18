@@ -1,10 +1,11 @@
-Sentry.init({ dsn: 'https://d6e4c11f6e97429da425d286c4670cd3@sentry.io/1297356' });
 var currentPage;
 var cast;
 var sessionState = "new";
 var sessionToken;
 var meetingName;
 var voters;
+var MASTER_HOST = location.host.split('.').slice(1).join('.') // drop first subdomain
+var SLUG = location.host.split('.')[0]
 var API_HOST = location.host;
 var API_WS_PROTOCOL = location.protocol == "https:" ? "wss://" : "ws://";
 var annId = 0;
@@ -13,24 +14,7 @@ var unfilledBallots = 0;
 var KIOSK_MODE;
 var _meetingId;
 
-// Routing
-var routes = {
-  "_description": "This file is used to define routing of the application.",
-  "/": "landing",
-  "#/": "landing",
-  "": "landing",
-  "#/auth": "auth",
-  "#/stv": "stv",
-  "#/blank": "blank",
-  "#/credits": "credits",
-  "#/loading": "loading"
-};
-
-function translateHash(hash) {
-  if (hash === "") { return translateHash("/"); }
-  if (routes[hash] != null) { return routes[hash]; }
-  return "404";
-}
+var orgcustoms = {};
 
 function replacePage(id) {
   $.ajax({
@@ -106,10 +90,25 @@ function loadKioskLanding() {
     $.ajax({
       url: location.protocol + '//' + API_HOST + '/api/list',
       success: function(data) {
-        if (data.meetings.length == 0) {
-          replacePage('nomeetings');
-          return;
-        }
+        orgcustoms = data;
+        $.get("/templates/landing.mustache", function(template) {
+          $('#page').html(Mustache.render(template, {'tenant_name': orgcustoms.name, 'welcome': orgcustoms.welcome}));
+          $('#loader').fadeOut(() => $('#page').fadeIn());
+        });
+      },
+      error: function(textStatus) {
+        alert('There has been an error communicating with the DemocrApp server. Error: ' + textStatus);
+      }
+    })
+  }))
+}
+
+function loadMainLanding() {
+  $('#page').fadeOut(() => $('#loader').fadeOut(() => {
+    $.ajax({
+      url: location.protocol + '//' + MASTER_HOST + '/api/custom/' + SLUG,
+      success: function(data) {
+        
         var meeting = data.meetings.find(m => m.id == _meetingId)
         if (meeting){
           $.get("/templates/kiosk-landing.mustache", function(template) {
@@ -514,5 +513,4 @@ $(document).ready(function() {
     console.error("[INIT] WebSocket support not found. Unable to launch app.");
     replacePage('notsupported');
   }
-  //replacePage(translateHash(window.location.hash));
 });
