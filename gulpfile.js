@@ -22,7 +22,14 @@ gulp.task('build', gulp.series('clean', 'sass'));
 gulp.task('bs', function() {
   
   browsersync.init({
-    server: "src"
+    server: {
+      baseDir: "src",
+      middleware: function (req, res, next) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        next();
+      }
+    }
+    
   });
 
   gulp.watch('./src/assets/css/*.scss', gulp.series('sass'));

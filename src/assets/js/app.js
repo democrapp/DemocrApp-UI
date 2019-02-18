@@ -14,7 +14,7 @@ var unfilledBallots = 0;
 var KIOSK_MODE;
 var _meetingId;
 
-var orgcustoms = {};
+var orgcustoms = null;
 
 function replacePage(id) {
   $.ajax({
@@ -105,27 +105,10 @@ function loadKioskLanding() {
 
 function loadMainLanding() {
   $('#page').fadeOut(() => $('#loader').fadeOut(() => {
-    $.ajax({
-      url: location.protocol + '//' + MASTER_HOST + '/api/custom/' + SLUG,
-      success: function(data) {
-        
-        var meeting = data.meetings.find(m => m.id == _meetingId)
-        if (meeting){
-          $.get("/templates/kiosk-landing.mustache", function(template) {
-            $('#page').html(Mustache.render(template, {'meeting_name': meeting.name, 'meeting_id': _meetingId}));
-            $('#loader').fadeOut(() => $('#page').fadeIn());
-            $('#authToken').focus();
-            $('#authForm').submit(submitTokenForm);
-          });
-        } else {
-          replacePage('400');
-          alert('Invalid meeting ID. Contact event organiser.');
-        }
-      },
-      error: function(textStatus) {
-        alert('There has been an error communicating with the DemocrApp server. Error: ' + textStatus);
-      }
-    })
+    $.get("/templates/landing.mustache", function(template) {
+      $('#page').html(Mustache.render(template, {'tenant_name': orgcustoms.name, 'welcome_text': orgcustoms.welcome}));
+      $('#loader').fadeOut(() => $('#page').fadeIn());
+    });
   }))
 }
 
@@ -482,7 +465,13 @@ $.urlParam = function(name){
 }
 
 // Page initialisation
-function init() {
+async function init() {
+  await getOrgcustoms()
+  if (orgcustoms == null) {
+    //failed to get org customs
+    return;
+  }
+  applyOrgCustoms();
   KIOSK_MODE = ($.urlParam('k') == "true");
   if (KIOSK_MODE) {
     Cookies.remove("session_token");
@@ -496,10 +485,39 @@ function init() {
     sessionToken = Cookies.get("session_token");
     openSocket();
   } else {
-    replacePage('landing');
+    loadMainLanding();
     if ($.urlParam('t')) {
       checkToken($.urlParam('t'), $.urlParam('m'));
     }
+  }
+}
+
+async function getOrgcustoms() {
+  return $.ajax({
+    url: location.protocol + '//' + MASTER_HOST + '/api/custom/' + SLUG
+  })
+  .done(function(data) {
+    orgcustoms = data;
+    return true;
+  })
+  .catch(function(error) {
+    $.get("/templates/customs-failed.mustache", function(template) {
+      $('#page').html(Mustache.render(template, {'reason': error.status + ' ' +  error.statusText + ': ' + error.responseText}));
+      $('#loader').fadeOut(() => $('#page').fadeIn());
+    });
+    return false;
+  });
+}
+
+function applyOrgCustoms() {
+  if (orgcustoms.logo){
+    $("#logo").fadeTo(100,0, function() {
+      $("#logo").attr("src", location.protocol + '//' + MASTER_HOST + orgcustoms.logo);
+    }).fadeTo(500,1);
+  }
+  $(document).attr("title", orgcustoms.name);
+  if (orgcustoms.css) {
+    $('head').append(`<link rel="stylesheet" href="${location.protocol + '//' + MASTER_HOST + orgcustoms.css}" type="text/css" />`);
   }
 }
 
