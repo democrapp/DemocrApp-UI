@@ -503,7 +503,7 @@ async function init() {
 
 async function getOrgcustoms() {
   return $.ajax({
-    url: location.protocol + '//' + MASTER_HOST + '/api/custom/' + SLUG
+    url: location.protocol + '//' + MASTER_HOST + '/custom/' + SLUG
   })
   .done(function(data) {
     orgcustoms = data;
