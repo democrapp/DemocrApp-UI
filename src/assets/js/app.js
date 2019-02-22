@@ -521,12 +521,12 @@ async function getOrgcustoms() {
 function applyOrgCustoms() {
   if (orgcustoms.logo){
     $("#logo").fadeTo(100,0, function() {
-      $("#logo").attr("src", location.protocol + '//' + MASTER_HOST + orgcustoms.logo);
+      $("#logo").attr("src", location.protocol + '//' + MASTER_HOST + '/' + orgcustoms.logo);
     }).fadeTo(500,1);
   }
   $(document).attr("title", orgcustoms.name);
   if (orgcustoms.css) {
-    $('head').append(`<link rel="stylesheet" href="${location.protocol + '//' + MASTER_HOST + orgcustoms.css}" type="text/css" />`);
+    $('head').append(`<link rel="stylesheet" href="${location.protocol}//${MASTER_HOST}/${orgcustoms.css}" type="text/css" />`);
   }
 }
 
