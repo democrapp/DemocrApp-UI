@@ -10,7 +10,7 @@
   </head>
   <body>
     <div class="header-container">
-        <img class="header-logo" src="/assets/img/EUTCredonwhite.png" />
+        <img class="header-logo" src="/assets/img/logo.png" />
     </div>
     <h1 id="heading">{meeting name}</h1>
     <h2 id="desc">...</h2>
@@ -21,7 +21,7 @@
     </p>
 
     <div class="token-container">
-      <div id="qr-code" qr-data="https://democrapp.bedlamtheatre.co.uk/" src=""></div>
+      <div id="qr-code" qr-data="https://democrapp.co.uk/" src=""></div>
       <div id="tokenfield" class="text-token">
         XXXX XXXX
       </div>
@@ -33,13 +33,8 @@
 
     <div class="link-container">
       <p>Please go to</p>
-      <p class="link">democrapp.bedlamtheatre.co.uk</p>
-      <p class="">and enter the above code or scan the QR code to be logged in automatically</p>
-    </div>
-
-    <div>
-      <p><strong>IMPORTANT:</strong></p>
-      <p>For DemocrApp to work, you need to connected to the "Bedlam" WiFi network. The password should be somewhere obvious.</p>
+      <p id="url"class="link">https://democrapp.co.uk</p>
+      <p class="">and enter the above code or scan the QR code to join the meeting.</p>
     </div>
 
   </body>
@@ -61,7 +56,8 @@
       var t = $.urlParam('t');
       var m = $.urlParam('m');
       $('#tokenfield').html(t);
-      $('#qr-code').attr("qr-data", "https://democrapp.bedlamtheatre.co.uk/?t=" + t + "&m=" + m);
+      $('#qr-code').attr("qr-data", window.location.origin + "/?t=" + t + "&m=" + m);
+      $('#url').html(window.location.origin)
       $('#heading').html($.urlParam('h'));
       $('#desc').html($.urlParam('d'));
       if ($.urlParam('p') == "True") {
