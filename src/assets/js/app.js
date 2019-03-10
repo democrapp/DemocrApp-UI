@@ -524,7 +524,7 @@ function applyOrgCustoms() {
       $("#logo").attr("src", location.protocol + '//' + MASTER_HOST + '/' + orgcustoms.logo);
     }).fadeTo(500,1);
   }
-  $(document).attr("title", orgcustoms.name);
+  $(document).attr("title", `${orgcustoms.name} | DemocrApp`);
   if (orgcustoms.css) {
     $('head').append(`<link rel="stylesheet" href="${location.protocol}//${MASTER_HOST}/${orgcustoms.css}" type="text/css" />`);
   }
