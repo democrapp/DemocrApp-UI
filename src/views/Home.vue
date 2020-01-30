@@ -62,9 +62,11 @@
         }
       },
       authenticate: function (token, meetingId) {
-        this.axios.post("/api/" + meetingId + "/checktoken", {token: token})
+        const params = new URLSearchParams();
+        params.append("token", token);
+        this.axios.post("/api/" + meetingId + "/checktoken", params)
           .then(response => {
-            console.log(data);
+            console.log(response.data);
             if (response.data.success) {
               this.$cookies.set("session_token", response.data.session_token, 1);
               this.sessionToken = response.data.session_token;
