@@ -4,7 +4,7 @@
         <h5>Your vote for the ballot was not accepted.</h5>
         <p>{{desc}}</p>
         <p>
-            <button type="button" @click="$emit('ballot_close', ballot_id, voter.id)" class="btn btn-outline-dark">Dismiss</button>
+            <button type="button" @click="$emit('ballot_close', ballot_id, voter.token)" class="btn btn-outline-dark">Dismiss</button>
         </p>
     </div>
 </template>

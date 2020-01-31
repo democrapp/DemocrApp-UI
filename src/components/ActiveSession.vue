@@ -249,14 +249,14 @@
         let self = this;
 
         if (msg.result == "failure") {
-          let matching_indices = []
+          let matching_indices = [];
           this.ballots.forEach(function (ballot, index) {
             if (ballot.ballot_id == msg.ballot_id) {
               matching_indices.unshift(index);
             }
           });
           matching_indices.forEach(function (ballot_index) {
-            let new_obj = Object.assign(self.ballots[ballot_index], {type: "failure_notice", desc: msg.reason});
+            let new_obj = Object.assign(self.ballots[ballot_index], {method: "failure_notice", desc: msg.reason});
             self.$set(self.ballots, ballot_index, new_obj);
           });
           return;
@@ -273,7 +273,7 @@
 
           //auto logout if no ballots left
           self.unfilledBallots--;
-          if (self.unfilledBallots == 0 && KIOSK_MODE) {
+          if (self.unfilledBallots == 0 && self.KIOSK_MODE) {
             setTimeout(userEndSession, 1000);
           }
         })
