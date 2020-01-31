@@ -12,12 +12,14 @@
             </div>
         </div>
         <div v-else-if="sessionState == 'connected'" key="working" class="container">
-            <CardStream v-bind:meeting-name="meetingName"
-                        v-bind:ballots="ballots"
-                        v-bind:alerts="alerts"
+            <CardStream :meeting-name="meetingName"
+                        :ballots="ballots"
+                        :alerts="alerts"
+                        :announcements="announcements"
                         @ballot_submit="submitBallot"
                         @ballot_close="closeBallot"
-                        @close_alert="closeAlert"/>
+                        @close_alert="closeAlert"
+                        @dismiss_announcement="closeAnnouncement"/>
         </div>
         <div v-else key="error" class="container">
             <div class="message">
@@ -60,9 +62,11 @@
         meetingName: "",
         ballots: [],
         alerts: [],
+        announcements: [],
         unfilledBallots: 0,
         API_HOST: location.host,
         API_WS_PROTOCOL: location.protocol == "https:" ? "wss://" : "ws://",
+        announcement_id: 0
       }
     },
     mounted() {
@@ -128,17 +132,9 @@
             terminateSession(msg);
             break;
           case "announcement":
-            var id = "a-" + (annId++);
-            $.get("/templates/message-card.mustache", function (template) {
-              $('#stream').hide().prepend(Mustache.render(template, {
-                id: id,
-                message: msg.message
-              })).fadeIn();
-              if (visibleCards == 0) {
-                $('#message-connected').fadeOut();
-              }
-              visibleCards++;
-            });
+            let id = this.announcement_id++;
+            msg.id = id;
+            this.announcements.push(msg);
             break;
           default:
             alert("There has been a communications error.");
@@ -252,6 +248,14 @@
         this.alerts.forEach(function (alert,index) {
             if (alert.ballot_name == ballot_name) {
               self.alerts.splice(index,1);
+            }
+          });
+      },
+      closeAnnouncement: function (a_id) {
+        let self = this;
+        this.announcements.forEach(function (a,index) {
+            if (a.id == a_id) {
+              self.announcements.splice(index,1);
             }
           });
       },

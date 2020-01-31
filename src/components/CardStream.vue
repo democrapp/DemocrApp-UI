@@ -18,6 +18,11 @@
 
         <div id="stream" class="container">
             <transition-group name="fade">
+                <template v-for="announcement in announcements">
+                    <Announcement v-bind="announcement"
+                                  v-bubble:dismiss_announcement
+                                  :key="announcement.id"/>
+                </template>
                 <template v-for="ballot in ballots">
                     <div v-bind:key="ballot.ballot_id + '-' + ballot.voter.token">
                         <STVBallot v-bind="ballot" v-if="ballot.method=='STV'"
@@ -51,14 +56,16 @@
   import STVBallot from "./STVBallot";
   import FailureNotice from "./FailureNotice";
   import YNABallot from "./YNABallot";
+  import Announcement from "./Announcement";
 
   export default {
     name: "CardStream",
-    components: {YNABallot, FailureNotice, STVBallot},
+    components: {Announcement, YNABallot, FailureNotice, STVBallot},
     props: {
       meetingName: {type: String, required: true},
       ballots: Array,
       alerts: Array,
+      announcements: Array
     }
   }
 </script>
