@@ -16,11 +16,17 @@
             </div>
         </div>
 
-        <div id="stream" class="container" v-for="ballot in ballots">
-            <transition name="fade">
-                <STVBallot v-bind="ballot" v-if="ballot.method=='STV'" v-bubble.ballot_submit.ballot_close/>
-                <FailureNotice v-bind="ballot" v-if="ballot.method=='failure_notice'" v-bubble.ballot_close/>
-            </transition>
+        <div id="stream" class="container">
+            <transition-group name="fade">
+                <template v-for="ballot in ballots">
+                    <div v-bind:key="ballot.ballot_id + '-' + ballot.voter.token">
+                        <STVBallot v-bind="ballot" v-if="ballot.method=='STV'"
+                                   v-bubble.ballot_submit.ballot_close/>
+                        <FailureNotice v-bind="ballot" v-if="ballot.method=='failure_notice'"
+                                       v-bubble.ballot_close/>
+                    </div>
+                </template>
+            </transition-group>
         </div>
         <div class="container" v-if="!ballots.length">
             <div id="message-connected" class="message">
