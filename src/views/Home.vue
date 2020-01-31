@@ -1,7 +1,10 @@
 <template>
     <div class="home">
         <div v-if="sessionToken">
-            <ActiveSession v-bind:session-token="sessionToken" v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE" @reload="init"/>
+            <ActiveSession v-bind:session-token="sessionToken"
+                           v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE"
+                           @reload="init"
+                           :key="initCount"/>
         </div>
         <div v-else-if="message">
             {{message}}
@@ -29,7 +32,8 @@
         meetingId: null,
         sessionToken: null,
         meetingList: null,
-        cast: null
+        cast: null,
+        initCount: 0
       }
     },
     mounted() {
@@ -37,6 +41,7 @@
     },
     methods: {
       init: function () {
+        this.initCount++;
         this.sessionToken = null;
         this.axios.get('/api/list')
           .then(response => (
@@ -55,10 +60,9 @@
           console.log("[INIT] Found existing session token.");
           this.sessionToken = this.$cookies.get("session_token");
         } else {
-          //replacePage('landing');
-          //if ($.urlParam('t')) {
-          //  //checkToken($.urlParam('t'), $.urlParam('m'));
-          //}
+          if (this.$route.query.t) {
+            this.authenticate(this.$route.query.t, this.$route.query.m);
+          }
         }
       },
       authenticate: function (token, meetingId) {

@@ -2,15 +2,15 @@
     <div>
         <h1>{{meetingName}}</h1>
 
-        <div id="alerts" class="container" v-for="alert in alerts">
-            <div class="alert alert-warning alert-dismissable fade show">
+        <div id="alerts" class="container">
+            <div class="alert alert-warning alert-dismissable fade show" v-for="alert in alerts">
                 <strong>Heads up!</strong> We've already recieved at least one vote for the ballot titled
                 "{{alert.ballot_name}}"
                 from this session. Any further votes will replace those previously submitted.
                 <p class="small">We've pulled any currently open ballots back when the page reloaded in case something
                     went
                     wrong. Feel free to submit them again.</p>
-                <button type="button" class="btn btn-outline-dark btn-sm" data-dismiss="alert" aria-label="Close">
+                <button type="button" class="btn btn-outline-dark btn-sm" @click="$emit('close_alert', alert.ballot_name)">
                     Dismiss
                 </button>
             </div>
@@ -23,10 +23,10 @@
                         <STVBallot v-bind="ballot" v-if="ballot.method=='STV'"
                                    v-bubble:ballot_submit
                                    v-bubble:ballot_close/>
-                        <YNABallot v-bind="ballot" v-if="ballot.method=='YNA'"
+                        <YNABallot v-bind="ballot" v-else-if="ballot.method=='YNA'"
                                    v-bubble:ballot_submit
                                    v-bubble:ballot_close/>
-                        <FailureNotice v-bind="ballot" v-if="ballot.method=='failure_notice'"
+                        <FailureNotice v-bind="ballot" v-else-if="ballot.method=='failure_notice'"
                                        v-bubble:ballot_close/>
                     </div>
                 </template>

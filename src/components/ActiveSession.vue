@@ -14,8 +14,10 @@
         <div v-else-if="sessionState == 'connected'" key="working" class="container">
             <CardStream v-bind:meeting-name="meetingName"
                         v-bind:ballots="ballots"
+                        v-bind:alerts="alerts"
                         @ballot_submit="submitBallot"
-                        @ballot_close="closeBallot"/>
+                        @ballot_close="closeBallot"
+                        @close_alert="closeAlert"/>
         </div>
         <div v-else key="error" class="container">
             <div class="message">
@@ -242,6 +244,14 @@
         this.ballots.forEach(function (ballot, index) {
             if (ballot.ballot_id == ballot_id && ballot.voter.token == voter_token) {
               self.ballots.splice(index,1);
+            }
+          });
+      },
+      closeAlert: function (ballot_name) {
+        let self = this;
+        this.alerts.forEach(function (alert,index) {
+            if (alert.ballot_name == ballot_name) {
+              self.alerts.splice(index,1);
             }
           });
       },
