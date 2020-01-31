@@ -36,7 +36,6 @@ body {
 .ballot {
   margin-bottom: 20px; }
   .ballot .loader, .ballot .success {
-    display: none;
     margin: 20px;
     text-align: center; }
     .ballot .loader p, .ballot .loader h6, .ballot .success p, .ballot .success h6 {

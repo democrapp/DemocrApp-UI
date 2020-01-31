@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <div v-if="sessionToken">
-            <ActiveSession v-bind:session-token="sessionToken" @reload="init"/>
+            <ActiveSession v-bind:session-token="sessionToken" v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE" @reload="init"/>
         </div>
         <div v-else-if="message">
             {{message}}

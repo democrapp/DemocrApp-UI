@@ -12,25 +12,12 @@
             </div>
         </div>
         <div v-else-if="sessionState == 'connected'" key="working" class="container">
-            <h1>{{meetingName}}</h1>
-
-            <div id="alerts" class="container"></div>
-
-            <div id="stream" class="container">
-                <div id="message-connected" class="message">
-                    <img src="/assets/img/ballot_paper.svg"/>
-                    <h5>You're connected.</h5>
-                    <p>Ballot papers will appear here when the vote is opened.</p>
-                    <p class="small text-muted">
-                        You can leave this page and come back later - we've remembered your token.
-                        Otherwise, hang around and
-                        we'll push content to this page as you need it.
-                    </p>
-                </div>
-
-            </div>
+            <CardStream v-bind:meeting-name="meetingName"
+                        v-bind:ballots="ballots"
+                        @ballot_submit="submitBallot"
+                        @ballot_close="closeBallot"/>
         </div>
-        <div key="error" class="container">
+        <div v-else key="error" class="container">
             <div class="message">
                 <i class="i-main fa fa-plug fa-5x"/>
                 <h5>You've been disconnected.</h5>
@@ -38,7 +25,7 @@
                     connection and then reconnect.</p>
                 <p>Disconnect reason: <code>Code: {{code}} {{reason}}</code>
                 <p>
-                    <button type="button" onClick="$emit('reload')" class="btn btn-outline-dark">Reload
+                    <button type="button" @click="$emit('reload')" class="btn btn-outline-dark">Reload
                     </button>
                 </p>
                 <p class="small text-muted">
@@ -52,10 +39,14 @@
 </template>
 
 <script>
+  import CardStream from "./CardStream";
+
   export default {
     name: "ActiveSession",
+    components: {CardStream},
     props: {
-      sessionToken: true
+      sessionToken: true,
+      KIOSK_MODE: false,
     },
     data: function () {
       return {
@@ -65,36 +56,42 @@
         reason: "",
         voters: [],
         meetingName: "",
+        ballots: [],
+        alerts: [],
+        unfilledBallots: 0,
+        API_HOST: location.host,
+        API_WS_PROTOCOL: location.protocol == "https:" ? "wss://" : "ws://",
       }
     },
     mounted() {
-      this.cast = new WebSocket("/cast");
-      var hs = {
+      let self = this;
+      this.cast = new WebSocket(this.API_WS_PROTOCOL + this.API_HOST +"/cast");
+      let hs = {
         "type": "auth_request",
         "session_token": this.$cookies.get("session_token")
       };
       console.log(hs);
       this.cast.onopen = function () {
-        this.cast.send(JSON.stringify(hs));
+        self.cast.send(JSON.stringify(hs));
       };
       this.cast.onmessage = function (msg) {
-        this.castReceived(JSON.parse(msg.data));
+        self.castReceived(JSON.parse(msg.data));
       };
       this.cast.onerror = (e) => {
-        this.sessionState = "failed";
+        self.sessionState = "failed";
         console.log("[CAST] Unable to create Websocket.");
         console.log(e);
-        this.code = "WS_INIT_FAIL";
-        this.reason = "Unable to create Websocket.";
+        self.code = "WS_INIT_FAIL";
+        self.reason = "Unable to create Websocket.";
       };
       this.cast.onclose = (e) => {
-        if (this.sessionState == "terminated") {
+        if (self.sessionState == "terminated") {
           return;
         }
-        this.sessionState = "failed";
+        self.sessionState = "failed";
         console.log("[CAST] Websocket failed.");
-        this.code = e.code;
-        this.reason = e.reason;
+        self.code = e.code;
+        self.reason = e.reason;
       };
     },
     methods: {
@@ -105,7 +102,6 @@
           case "auth_response":
             if (msg.result == "success") {
               console.log("[CAST] Authentication success.");
-              $('#logoutButton').show();
               this.meetingName = msg.meeting_name;
               this.voters = msg.voters;
               this.sessionState = "connected";
@@ -118,10 +114,10 @@
             }
             break;
           case "ballot":
-            ballotRecieved(msg);
+            this.ballotReceived(msg);
             break;
           case "ballot_receipt":
-            ballotReceipt(msg);
+            this.ballotReceipt(msg);
             break;
           case "ballot_closed":
             ballotClosed(msg);
@@ -154,8 +150,135 @@
             this.cast.close();
           }
         }
+      },
+      ballotReceived: function (msg) {
+        if (msg.existing_ballots) {
+          this.alerts.push({ballot_name: msg.title})
+        }
+        let self = this;
+        this.voters.forEach(function (voter) {
+          let ballot = Object.assign({}, msg);
+          let xvoter = Object.assign({}, voter);
+          ballot.voter = xvoter;
+          ballot.submitted = false;
+          self.ballots.push(ballot);
+          self.unfilledBallots++;
+        });
+        /*switch (msg.method) {
+          case "STV":
+            console.log("[BALLOT] New using STV");
+            voters.forEach(voter => {
+              var v = {
+                ballot_id: msg.ballot_id,
+                title: msg.title,
+                desc: msg.desc,
+                options: msg.options,
+              }
+              if ((voter.type != "proxy") || msg.proxies) {
+                v.proxy = (voter.type == "proxy");
+                v.voter_id = voter.token;
+                $.get("/templates/stv-card.mustache", function (template) {
+                  addBallotCard(Mustache.render(template, v));
+                });
+              }
+            });
+            break;
+          case "YNA":
+            console.log("[BALLOT] New using Y/N/A");
+            voters.forEach(voter => {
+              if ((voter.type != "proxy") || msg.proxies) {
+                var v = {
+                  ballot_id: msg.ballot_id,
+                  title: msg.title,
+                  desc: msg.desc,
+                  yes_id: "foo",
+                  no_id: "bar",
+                  abs_id: "zip"
+                }
+                msg.options.forEach(option => {
+                  switch (option.name) {
+                    case "yes":
+                      v.yes_id = option.id;
+                      break;
+                    case "no":
+                      v.no_id = option.id;
+                      break;
+                    case "abs":
+                      v.abs_id = option.id;
+                      break;
+                    default:
+                      console.log("[BALLOT] Unexpected YNA option name " + option.name + " - ignoring");
+                      break;
+                  }
+                })
+                if (v.yes_id == undefined || v.no_id == undefined || v.abs_id == undefined) {
+                  console.error("[BALLOT] Incomplete YNA option ID set. Unable to render.");
+                  return;
+                }
+                v.proxy = (voter.type == "proxy");
+                v.voter_id = voter.token;
+                $.get("/templates/yna-card.mustache", function (template) {
+                  addBallotCard(Mustache.render(template, v));
+                });
+              }
+            });
+            break;
+          default:
+            console.error("[BALLOT] Unsupported method: \"" + msg.method + "\"");
+            break;
+         */
+      },
+      submitBallot: function (ballot_id, votes) {
+        let message = {
+          type: "ballot_form",
+          ballot_id: ballot_id,
+          session_token: this.sessionToken,
+          votes: votes
+        };
+        this.cast.send(JSON.stringify(message));
+      },
+      closeBallot: function (ballot_id, voter_token) {
+        let self = this;
+        this.ballots.forEach(function (ballot, index) {
+            if (ballot.ballot_id == ballot_id && ballot.voter.token == voter_token) {
+              self.ballots.splice(index,1);
+            }
+          });
+      },
+      ballotReceipt: function (msg) {
+        let self = this;
+
+        if (msg.result == "failure") {
+          let matching_indices = []
+          this.ballots.forEach(function (ballot, index) {
+            if (ballot.ballot_id == msg.ballot_id) {
+              matching_indices.unshift(index);
+            }
+          });
+          matching_indices.forEach(function (ballot_index) {
+            let new_obj = Object.assign(self.ballots[ballot_index], {type: "failure_notice", desc: msg.reason});
+            self.$set(self.ballots, ballot_index, new_obj);
+          });
+          return;
+        }
+
+        msg.voter_token.forEach(voter => {
+          //set submitted for each received receipt
+          self.ballots.forEach(function (ballot, index) {
+            if (ballot.ballot_id == msg.ballot_id && ballot.voter.token == voter) {
+              let new_obj = Object.assign(self.ballots[index], {submitted: true});
+              self.$set(self.ballots, index, new_obj);
+            }
+          });
+
+          //auto logout if no ballots left
+          self.unfilledBallots--;
+          if (self.unfilledBallots == 0 && KIOSK_MODE) {
+            setTimeout(userEndSession, 1000);
+          }
+        })
       }
-    }
+    },
   }
 </script>
 
