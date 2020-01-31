@@ -21,9 +21,13 @@
                 <template v-for="ballot in ballots">
                     <div v-bind:key="ballot.ballot_id + '-' + ballot.voter.token">
                         <STVBallot v-bind="ballot" v-if="ballot.method=='STV'"
-                                   v-bubble.ballot_submit.ballot_close/>
+                                   v-bubble:ballot_submit
+                                   v-bubble:ballot_close/>
+                        <YNABallot v-bind="ballot" v-if="ballot.method=='YNA'"
+                                   v-bubble:ballot_submit
+                                   v-bubble:ballot_close/>
                         <FailureNotice v-bind="ballot" v-if="ballot.method=='failure_notice'"
-                                       v-bubble.ballot_close/>
+                                       v-bubble:ballot_close/>
                     </div>
                 </template>
             </transition-group>
@@ -46,10 +50,11 @@
 <script>
   import STVBallot from "./STVBallot";
   import FailureNotice from "./FailureNotice";
+  import YNABallot from "./YNABallot";
 
   export default {
     name: "CardStream",
-    components: {FailureNotice, STVBallot},
+    components: {YNABallot, FailureNotice, STVBallot},
     props: {
       meetingName: {type: String, required: true},
       ballots: Array,
