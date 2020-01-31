@@ -68,7 +68,7 @@
           .then(response => {
             console.log(response.data);
             if (response.data.success) {
-              this.$cookies.set("session_token", response.data.session_token, '6h');
+              this.$cookies.set("session_token", response.data.session_token, 0);
               this.sessionToken = response.data.session_token;
             } else {
               alert("That voter token is invalid. Please try again.");
