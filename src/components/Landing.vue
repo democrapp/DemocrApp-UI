@@ -1,7 +1,7 @@
 <template>
     <transition name="fade">
         <div v-if="has_token" key="auth">
-            <Authentication v-bind:meeting-list="meetingList" v-bubble.authenticate/>
+            <Authentication v-bind:meeting-list="meetingList" v-bubble:authenticate/>
         </div>
         <div v-else key="landing">
             <div v-if="!meetingList">

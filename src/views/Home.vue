@@ -1,16 +1,29 @@
 <template>
     <div class="home">
+        <div class="header">
+            <img id='logo' src="/assets/img/EUTCredonwhite.png"></img>
+        </div>
         <div v-if="sessionToken">
             <ActiveSession v-bind:session-token="sessionToken"
                            v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE"
                            @reload="init"
+                           @logout="userEndSession"
                            :key="initCount"/>
         </div>
         <div v-else-if="message">
             {{message}}
         </div>
         <div v-else>
-            <Landing v-bind:meetingList="meetingList" @authenticate="authenticate"/>
+            <Landing v-bind:meetingList="meetingList"
+                     @authenticate="authenticate"/>
+        </div>
+        <div id="footer">
+            <button type="button" class="btn btn-secondary" @click="userEndSession" v-if="sessionToken">Logout
+            </button>
+            <p>
+                Created in the pursuit of simpler democracy. @rphi &amp; @saty9. <a
+                    href="https://github.com/EdinburghUniversityTheatreCompany/DemocrApp">GitHub</a>.
+            </p>
         </div>
     </div>
 </template>
@@ -81,6 +94,12 @@
           alert("There was an issue communicating with the DemocrApp API. Please try again.");
         });
       },
+      userEndSession: function () {
+        console.log("[SESSION] User terminated session.");
+        this.sessionToken = null;
+        this.$cookies.remove("session_token");
+        this.init()
+      }
     }
   }
 </script>

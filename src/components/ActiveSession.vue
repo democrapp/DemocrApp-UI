@@ -21,6 +21,10 @@
                         @close_alert="closeAlert"
                         @dismiss_announcement="closeAnnouncement"/>
         </div>
+        <div v-else-if="sessionState=='terminated'">
+            <TerminatedSession :reason="terminationReason"
+                                v-bubble:logout/>
+        </div>
         <div v-else key="error" class="container">
             <div class="message">
                 <i class="i-main fa fa-plug fa-5x"/>
@@ -44,10 +48,11 @@
 
 <script>
   import CardStream from "./CardStream";
+  import TerminatedSession from "./TerminatedSession";
 
   export default {
     name: "ActiveSession",
-    components: {CardStream},
+    components: {TerminatedSession, CardStream},
     props: {
       sessionToken: true,
       KIOSK_MODE: false,
@@ -66,7 +71,8 @@
         unfilledBallots: 0,
         API_HOST: location.host,
         API_WS_PROTOCOL: location.protocol == "https:" ? "wss://" : "ws://",
-        announcement_id: 0
+        announcement_id: 0,
+        terminationReason: "",
       }
     },
     mounted() {
@@ -100,6 +106,9 @@
         self.reason = e.reason;
       };
     },
+    beforeDestroy() {
+      this.closeSocket();
+    },
     methods: {
       castReceived: function (msg) {
         console.log("[CAST] Recieved " + msg.type);
@@ -129,7 +138,7 @@
             this.ballotClosed(msg);
             break;
           case "terminate_session":
-            terminateSession(msg);
+            this.terminateSession(msg);
             break;
           case "announcement":
             let id = this.announcement_id++;
@@ -294,17 +303,23 @@
       },
       ballotClosed: function (msg) {
         var ballotIndexes = [];
-        this.ballots.forEach( function(ballot, index) {
-          if (ballot.ballot_id == msg.ballot_id){
+        this.ballots.forEach(function (ballot, index) {
+          if (ballot.ballot_id == msg.ballot_id) {
             ballotIndexes.push(index)
           }
         });
         if (ballotIndexes.length) {
           let new_obj = Object.assign(this.ballots[ballotIndexes[0]], {method: "ballot_close", reason: msg.reason});
-          this.ballots.splice(ballotIndexes[0],ballotIndexes.length, new_obj);
+          this.ballots.splice(ballotIndexes[0], ballotIndexes.length, new_obj);
           this.unfilledBallots -= ballotIndexes.length;
         }
-      }
+      },
+      terminateSession: function (msg) {
+        this.terminationReason = msg.reason;
+        this.sessionState = "terminated";
+        console.log("[CAST] Session terminated by server.");
+        this.closeSocket();
+      },
     },
   }
 </script>
