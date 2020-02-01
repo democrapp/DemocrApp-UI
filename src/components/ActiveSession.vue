@@ -71,7 +71,7 @@
     },
     mounted() {
       let self = this;
-      this.cast = new WebSocket(this.API_WS_PROTOCOL + this.API_HOST +"/cast");
+      this.cast = new WebSocket(this.API_WS_PROTOCOL + this.API_HOST + "/cast");
       let hs = {
         "type": "auth_request",
         "session_token": this.$cookies.get("session_token")
@@ -126,7 +126,7 @@
             this.ballotReceipt(msg);
             break;
           case "ballot_closed":
-            ballotClosed(msg);
+            this.ballotClosed(msg);
             break;
           case "terminate_session":
             terminateSession(msg);
@@ -238,26 +238,26 @@
       closeBallot: function (ballot_id, voter_token) {
         let self = this;
         this.ballots.forEach(function (ballot, index) {
-            if (ballot.ballot_id == ballot_id && ballot.voter.token == voter_token) {
-              self.ballots.splice(index,1);
-            }
-          });
+          if (ballot.ballot_id == ballot_id && ballot.voter.token == voter_token) {
+            self.ballots.splice(index, 1);
+          }
+        });
       },
       closeAlert: function (ballot_name) {
         let self = this;
-        this.alerts.forEach(function (alert,index) {
-            if (alert.ballot_name == ballot_name) {
-              self.alerts.splice(index,1);
-            }
-          });
+        this.alerts.forEach(function (alert, index) {
+          if (alert.ballot_name == ballot_name) {
+            self.alerts.splice(index, 1);
+          }
+        });
       },
       closeAnnouncement: function (a_id) {
         let self = this;
-        this.announcements.forEach(function (a,index) {
-            if (a.id == a_id) {
-              self.announcements.splice(index,1);
-            }
-          });
+        this.announcements.forEach(function (a, index) {
+          if (a.id == a_id) {
+            self.announcements.splice(index, 1);
+          }
+        });
       },
       ballotReceipt: function (msg) {
         let self = this;
@@ -291,6 +291,19 @@
             setTimeout(userEndSession, 1000);
           }
         })
+      },
+      ballotClosed: function (msg) {
+        var ballotIndexes = [];
+        this.ballots.forEach( function(ballot, index) {
+          if (ballot.ballot_id == msg.ballot_id){
+            ballotIndexes.push(index)
+          }
+        });
+        if (ballotIndexes.length) {
+          let new_obj = Object.assign(this.ballots[ballotIndexes[0]], {method: "ballot_close", reason: msg.reason});
+          this.ballots.splice(ballotIndexes[0],ballotIndexes.length, new_obj);
+          this.unfilledBallots -= ballotIndexes.length;
+        }
       }
     },
   }

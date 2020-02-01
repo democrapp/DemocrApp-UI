@@ -33,6 +33,8 @@
                                    v-bubble:ballot_close/>
                         <FailureNotice v-bind="ballot" v-else-if="ballot.method=='failure_notice'"
                                        v-bubble:ballot_close/>
+                        <BallotClosed v-bind="ballot" v-else-if="ballot.method=='ballot_close'"
+                                      v-bubble:ballot_close/>
                     </div>
                 </template>
             </transition-group>
@@ -57,10 +59,11 @@
   import FailureNotice from "./FailureNotice";
   import YNABallot from "./YNABallot";
   import Announcement from "./Announcement";
+  import BallotClosed from "./BallotClosed";
 
   export default {
     name: "CardStream",
-    components: {Announcement, YNABallot, FailureNotice, STVBallot},
+    components: {BallotClosed, Announcement, YNABallot, FailureNotice, STVBallot},
     props: {
       meetingName: {type: String, required: true},
       ballots: Array,
