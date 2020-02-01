@@ -3,20 +3,38 @@
         <div class="header">
             <img id='logo' src="/assets/img/EUTCredonwhite.png"></img>
         </div>
-        <div v-if="sessionToken">
-            <ActiveSession v-bind:session-token="sessionToken"
-                           v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE"
-                           @reload="init"
-                           @logout="userEndSession"
-                           :key="initCount"/>
-        </div>
-        <div v-else-if="message">
-            {{message}}
-        </div>
-        <div v-else>
-            <Landing v-bind:meetingList="meetingList"
-                     @authenticate="authenticate"/>
-        </div>
+        <template v-if="wsSupport">
+            <div v-if="sessionToken">
+                <ActiveSession v-bind:session-token="sessionToken"
+                               v-bind:k-i-o-s-k_-m-o-d-e="KIOSK_MODE"
+                               @reload="init"
+                               @logout="userEndSession"
+                               :key="initCount"/>
+            </div>
+            <div v-else-if="message">
+                {{message}}
+            </div>
+            <div v-else>
+                <Landing v-bind:meetingList="meetingList"
+                         @authenticate="authenticate"/>
+            </div>
+        </template>
+        <template v-else>
+            <h1>Sorry!</h1>
+            <p>
+                Your browser or device does not support WebSockets. This app relies on WebSockets for
+                communication to the server, so unfortunately we cannot load the app here.
+            </p>
+
+            <p>
+                Please check your web browser is up to date, try a new modern browser like Chrome, Firefox or Safari,
+                or try on another device.
+            </p>
+
+            <p>
+                Alternatively, you may find it easier to use one of the e-voting kiosks.
+            </p>
+        </template>
         <div id="footer">
             <button type="button" class="btn btn-secondary" @click="userEndSession" v-if="sessionToken">Logout
             </button>
@@ -46,11 +64,19 @@
         sessionToken: null,
         meetingList: null,
         cast: null,
-        initCount: 0
+        initCount: 0,
+        wsSupport: true
       }
     },
     mounted() {
-      this.init();
+      console.log("[INIT] Checking for WebSocket support");
+      if (window.WebSocket) {
+        console.log("[INIT] WebSocket support found");
+        this.init();
+      } else {
+        console.error("[INIT] WebSocket support not found. Unable to launch app.");
+        this.wsSupport = false;
+      }
     },
     methods: {
       init: function () {
