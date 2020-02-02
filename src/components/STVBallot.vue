@@ -1,43 +1,46 @@
 <template>
     <form ref="form">
         <div class="card ballot">
-            <transition-group name="fade">
-                <div class="card-header" key="head">
-                    <div class="ballot-badges">
-                        <span class="badge badge-secondary">STV</span>
-                        <span class="badge badge-info" v-if="voter.type=='proxy'">PROXY</span>
+            <div class="card-header" key="head">
+                <div class="ballot-badges">
+                    <span class="badge badge-secondary">STV</span>
+                    <span class="badge badge-info" v-if="voter.type=='proxy'">PROXY</span>
+                </div>
+                <h5 class="card-title">{{title}}</h5>
+            </div>
+            <div class="card-body" key="desc">
+                <p class="card-text">
+                    {{desc}}
+                </p>
+            </div>
+            <transition name="fade" mode="out-in">
+                <div v-if="!submitting&&!submitted">
+                    <ul class="list-group list-group-flush" key="voting_options">
+                        <li v-for="option in options" class="list-group-item">
+                            {{option.name}}
+                            <input v-bind:name="option.id" class="ballot-preference-field" type="number"
+                                   placeholder="0"/>
+                        </li>
+                    </ul>
+                    <div class="card-footer" key="controls">
+                        <button type="button" @click="submit"
+                                class="btn btn-primary">Submit vote
+                        </button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </div>
-                    <h5 class="card-title">{{title}}</h5>
                 </div>
-                <div class="card-body" key="desc">
-                    <p class="card-text">
-                        {{desc}}
-                    </p>
-                </div>
-                <ul class="list-group list-group-flush" v-if="!submitting&&!submitted" key="voting_options">
-                    <li v-for="option in options" class="list-group-item">
-                        {{option.name}}
-                        <input v-bind:name="option.id" class="ballot-preference-field" type="number" placeholder="0"/>
-                    </li>
-                </ul>
-                <div class="card-footer" v-if="!submitting && !submitted" key="controls">
-                    <button type="button" @click="submit"
-                            class="btn btn-primary">Submit vote
-                    </button>
-                    <button type="reset" class="btn btn-secondary">Reset</button>
-                </div>
-                <div class="loader" style="" v-if="submitting && !submitted" key="loader">
+                <div class="loader" style="" v-else-if="submitting && !submitted" key="loader">
                     <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
                     <p>Submitting...</p>
                 </div>
-                <div class="success" v-if="submitted" key="confirmation">
+                <div class="success" v-else-if="submitted" key="confirmation">
                     <i class="fa fa-check fa-4x"></i>
                     <h6>Great! Your vote has been recieved.</h6>
                     <button class="btn btn-outline-dark" type="button"
                             @click="$emit('ballot_close', ballot_id, voter.token)">Dismiss
                     </button>
                 </div>
-            </transition-group>
+            </transition>
         </div>
     </form>
 </template>
@@ -53,7 +56,7 @@
       options: Array,
       submitted: Boolean
     },
-    data: function() {
+    data: function () {
       return {
         submitting: false
       }

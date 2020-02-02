@@ -12,34 +12,36 @@
                 <p class="card-text">
                     {{desc}}
                 </p>
-                <div v-if="!submitted && !submitting" class="active-body">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-lg btn-success"
-                                @click="ynaButtonClick('yes')" ref="yes"
-                                v-bind:class="{ active: active=='yes' }">Yes
-                        </button>
-                        <button type="button" class="btn btn-lg btn-danger"
-                                @click="ynaButtonClick('no')" ref="no"
-                                v-bind:class="{ active: active=='no' }">No
-                        </button>
-                        <button type="button" class="btn btn-lg btn-secondary"
-                                @click="ynaButtonClick('abs')" ref="abs"
-                                v-bind:class="{ active: active=='abs' }">
-                            Abstain
+                <transition name="fade" mode="out-in">
+                    <div v-if="!submitted && !submitting" class="active-body" key="body">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-lg btn-success"
+                                    @click="ynaButtonClick('yes')" ref="yes"
+                                    v-bind:class="{ active: active=='yes' }">Yes
+                            </button>
+                            <button type="button" class="btn btn-lg btn-danger"
+                                    @click="ynaButtonClick('no')" ref="no"
+                                    v-bind:class="{ active: active=='no' }">No
+                            </button>
+                            <button type="button" class="btn btn-lg btn-secondary"
+                                    @click="ynaButtonClick('abs')" ref="abs"
+                                    v-bind:class="{ active: active=='abs' }">
+                                Abstain
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else-if="submitting && !submitted" class="loader" key="loader">
+                        <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+                        <p>Submitting...</p>
+                    </div>
+                    <div v-else-if="submitted" class="success" key="success">
+                        <i class="fa fa-check fa-4x"></i>
+                        <h6>Great! Your vote has been recieved.</h6>
+                        <button class="btn btn-outline-dark" type="button"
+                                @click="$emit('ballot_close', ballot_id, voter.token)">Dismiss
                         </button>
                     </div>
-                </div>
-                <div v-if="submitting && !submitted" class="loader" style="">
-                    <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-                    <p>Submitting...</p>
-                </div>
-                <div v-if="submitted" class="success">
-                    <i class="fa fa-check fa-4x"></i>
-                    <h6>Great! Your vote has been recieved.</h6>
-                    <button class="btn btn-outline-dark" type="button"
-                            @click="$emit('ballot_close', ballot_id, voter.token)">Dismiss
-                    </button>
-                </div>
+                </transition>
             </div>
             <div v-if="!submitted && !submitting" class="card-footer">
                 <p class="text-muted small">Click your selection once to select and then again to submit.</p>

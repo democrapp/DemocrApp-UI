@@ -26,7 +26,7 @@
   export default {
     name: "Authentication",
     props: {
-      meetingList: [],
+      meetingList: Array,
     },
     data: function() {
       return {
