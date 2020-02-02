@@ -13,6 +13,7 @@
     "core-js": "^3.4.4",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
+    "qrcode-generator": "^1.4.4",
     "vue": "^2.6.10",
     "vue-axios": "^2.1.5",
     "vue-cookies": "^1.6.1",
