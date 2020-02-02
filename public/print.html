@@ -79,7 +79,7 @@
       document.getElementById('tokenwarning').style.display = "initial";
     }
     ;
-    let qr = qrcode(4, 'L');
+    let qr = qrcode(0, 'M');
     qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
     qr.make();
     document.getElementById('qr-code').innerHTML = qr.createImgTag(3);
