@@ -6,8 +6,8 @@
 
 
         <form id="authForm">
-            <select class="form-control" v-for="meeting in meetingList" v-model="meetingId">
-                <option v-bind:value="meeting.id">{{meeting.name}}</option>
+            <select class="form-control" v-model="meetingId">
+                <option v-bind:value="meeting.id" v-for="meeting in meetingList">{{meeting.name}}</option>
             </select>
 
             <input class="form-control" type="number" placeholder="token" v-model="authToken"/>
