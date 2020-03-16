@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" href="/assets/css/print.css"/>
+
+    <title>🖨 - DemocrApp</title>
+
+</head>
+<body>
+<div class="header-container">
+    <img class="header-logo" src="/assets/img/EUTCredonwhite.png"/>
+</div>
+<h1 id="heading">{meeting name}</h1>
+<h2 id="desc">...</h2>
+
+<p>
+    You have now been registered. Your <strong>DemocrApp</strong>
+    authentication token is:
+</p>
+
+<div class="token-container">
+    <div id="qr-code" qr-data="https://democrapp.bedlamtheatre.co.uk/" src=""></div>
+    <div id="tokenfield" class="text-token">
+        XXXX XXXX
+    </div>
+</div>
+
+<div id="tokenwarning" style="display: none;">
+    <h2>NOTE: This token has a proxy attached</h2>
+</div>
+
+<div class="link-container">
+    <p>Please go to</p>
+    <p id="link" class="link"></p>
+    <p class="">and enter the above code or scan the QR code to be logged in automatically</p>
+</div>
+
+<div>
+    <p><strong>IMPORTANT:</strong></p>
+    <p>For DemocrApp to work, you need to connected to the "Bedlam" WiFi network. The password
+        should be somewhere obvious.</p>
+</div>
+
+</body>
+
+<script src="/assets/vendor/qrcode.js"></script>
+<script>
+  function ready(callback) {
+    // in case the document is already rendered
+    if (document.readyState != 'loading') callback();
+    // modern browsers
+    else if (document.addEventListener) document.addEventListener('DOMContentLoaded', callback);
+    // IE <= 8
+    else document.attachEvent('onreadystatechange', function () {
+        if (document.readyState == 'complete') callback();
+      });
+  }
+
+  let urlParam = function (name) {
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results == null) {
+      return null;
+    } else {
+      return decodeURI(results[1]) || 0;
+    }
+  }
+
+  ready(() => {
+    let t = urlParam('t');
+    let m = urlParam('m');
+    document.getElementById('tokenfield').innerHTML = t;
+    document.getElementById('link').innerHTML = location.host;
+    document.getElementById('qr-code').setAttribute("qr-data", location.origin + "/?t=" + t + "&m=" + m);
+    document.getElementById('heading').innerHTML = urlParam('h');
+    document.getElementById('desc').innerHTML = urlParam('d');
+    if (urlParam('p') == "True") {
+      document.getElementById('tokenwarning').style.display = "initial";
+    }
+    ;
+    let qr = qrcode(0, 'M');
+    qr.addData(document.getElementById('qr-code').getAttribute('qr-data'));
+    qr.make();
+    document.getElementById('qr-code').innerHTML = qr.createImgTag(3);
+    ready(() => {
+      window.print();
+      setTimeout(function () {
+        window.close();
+      }, 100);
+    });
+  });
+</script>
+</html>

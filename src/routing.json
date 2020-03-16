@@ -1,8 +1,0 @@
-{
-  "_description": "This file is used to define routing of the application.",
-  "/": "landing",
-  "#/": "landing",
-  "": "landing",
-  "#/auth": "auth",
-  "#/stv": "stv"
-}
