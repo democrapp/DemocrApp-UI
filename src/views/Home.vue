@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <div class="header">
-            <img id='logo' src="/assets/img/EUTCredonwhite.png"></img>
+            <img id='logo' src="/assets/img/EUTCredonwhite.png"/>
         </div>
         <template v-if="wsSupport">
             <div v-if="sessionToken">
@@ -16,6 +16,7 @@
             </div>
             <div v-else>
                 <Landing v-bind:meetingList="meetingList"
+                         v-bind:captchaKey="GRC_SITEKEY"
                          @authenticate="authenticate"/>
             </div>
         </template>
@@ -49,6 +50,7 @@
 <script>
   import Landing from "../components/Landing";
   import ActiveSession from "../components/ActiveSession";
+  let GRC_SITEKEY = "6LfeMuMUAAAAAKtZ1SDwcijqOUgtYPsdcR2ricw7";
 
   export default {
     name: 'home',
@@ -65,7 +67,8 @@
         meetingList: null,
         cast: null,
         initCount: 0,
-        wsSupport: true
+        wsSupport: true,
+        GRC_SITEKEY: GRC_SITEKEY
       }
     },
     mounted() {
@@ -104,9 +107,10 @@
           }
         }
       },
-      authenticate: function (token, meetingId) {
+      authenticate: function (token, meetingId, captchaTokenResponse) {
         const params = new URLSearchParams();
         params.append("token", token);
+        params.append("recaptcha", captchaTokenResponse);
         this.axios.post("/api/" + meetingId + "/checktoken", params)
           .then(response => {
             console.log(response.data);
@@ -114,6 +118,7 @@
               this.$cookies.set("session_token", response.data.session_token, 0);
               this.sessionToken = response.data.session_token;
             } else {
+              grecaptcha.reset();
               alert("That voter token is invalid. Please try again.");
             }
           }).catch(error => {

@@ -1,7 +1,9 @@
 <template>
     <transition name="fade">
         <div v-if="has_token" key="auth">
-            <Authentication v-bind:meeting-list="meetingList" v-bubble:authenticate/>
+            <Authentication v-bind:meeting-list="meetingList"
+                            v-bind:captchaKey="captchaKey"
+                            v-bubble:authenticate/>
         </div>
         <div v-else key="landing">
             <div v-if="!meetingList">
@@ -80,7 +82,8 @@
       Authentication,
     },
     props: {
-      meetingList: null
+      meetingList: null,
+      captchaKey: null
     },
     data: function () {
       return {

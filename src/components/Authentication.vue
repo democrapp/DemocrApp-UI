@@ -12,6 +12,8 @@
 
             <input class="form-control" type="number" placeholder="token" v-model="authToken"/>
 
+            <div id="captcha"></div>
+
             <button type="button" class="btn btn-primary mx-auto btn-block" @click="authenticate">
                 Submit
             </button>
@@ -27,6 +29,7 @@
     name: "Authentication",
     props: {
       meetingList: Array,
+      captchaKey: String
     },
     data: function() {
       return {
@@ -36,8 +39,14 @@
     },
     methods: {
       authenticate: function () {
-        this.$emit('authenticate', this.authToken, this.meetingId)
+        this.$emit('authenticate', this.authToken, this.meetingId, grecaptcha.getResponse() )
       }
+    },
+    mounted() {
+      grecaptcha.render('captcha', {
+          'sitekey' : this.captchaKey
+        });
+
     }
   }
 </script>
